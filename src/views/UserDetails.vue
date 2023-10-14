@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onBeforeMount, reactive, computed } from 'vue';
+import { ref, onBeforeMount, reactive, computed, watch } from 'vue';
 
 import MasterLayout from './MasterLayout.vue';
 
-const loading = ref(true);
+const message = ref('');
+
 const user = ref({
     name: 'Bhubon Sutradhar',
     avatar: 'https://cdn.ostad.app/user/avatar/2023-05-22T09-59-24.957Z-me---light.jpg',
@@ -16,16 +17,35 @@ const user = ref({
 });
 
 
-
-
 const birthYear = computed(() => {
+
+    let oldBirthDateYear = parseInt(user.value.birth.split('-')[2], 10);
+    let oldBirthDateMonth = parseInt(user.value.birth.split('-')[0], 10) - 1;
+    let oldBirthDateDay = parseInt(user.value.birth.split('-')[1], 10);
+
     let currentYear = new Date().getFullYear();
-    return currentYear - user.value.age;
+    let newBirthDateYear = currentYear - user.value.age;
+
+    user.value.birth = formatDate(new Date(newBirthDateYear, oldBirthDateMonth, oldBirthDateDay));
+
+    return newBirthDateYear;
 });
 
 const voteMessage = computed(() => {
     return user.value.age >= 18 ? 'Legal for Vote' : 'Not Legal for Vote';
 });
+
+watch(() => {
+    message.value = user.value.age >= 18 ? 'Eligible for voting' : 'Not eligible for voting';
+});
+
+function formatDate(date) {
+    var month = date.getMonth() + 1; // Months are 0-indexed
+    var day = date.getDate();
+    var year = date.getFullYear();
+    return (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day + '-' + year;
+}
+
 
 
 
@@ -64,7 +84,10 @@ const voteMessage = computed(() => {
                                 </tr>
                                 <tr>
                                     <td>Avatar: </td>
-                                    <td><img :src="user.avatar" alt=""></td>
+                                    <td>
+                                        <img :src="user.avatar" alt="">
+                                        <h2>{{ message }}</h2>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Description: </td>
